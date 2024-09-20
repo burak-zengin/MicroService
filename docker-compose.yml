@@ -1,0 +1,95 @@
+version: '3.4'
+
+services:
+  sql:
+    image: "mcr.microsoft.com/azure-sql-edge"
+    container_name: sql
+    environment:
+        - ACCEPT_EULA=1
+        - MSSQL_USER=SA
+        - MSSQL_SA_PASSWORD=P@sSw0rd!
+        - MSSQL_PID=Developer
+    ports:
+        - "1433:1433"
+    depends_on:
+        - rabbitmq
+    networks:
+      - sample-network
+  rabbitmq:
+    image: "rabbitmq:3.8.14-management"
+    container_name: rabbitmq
+    ports:
+        - 15671:15671
+        - 15672:15672
+        - 15691:15691
+        - 15692:15692
+        - 25672:25672
+        - 4369:4369
+        - 5671:5671
+        - 5672:5672
+    networks:
+      - sample-network
+  catalog.api:
+    image: ${DOCKER_REGISTRY-}catalogapi
+    hostname: catalogapi
+    depends_on:
+        - rabbitmq
+        - sql 
+    networks:
+      - sample-network
+    build:
+      context: .
+      dockerfile: src/Catalog/Catalog.Api/Dockerfile
+  ordering.api:
+    image: ${DOCKER_REGISTRY-}catalogapi
+    hostname: orderingapi
+    depends_on:
+        - rabbitmq
+        - sql 
+    networks:
+      - sample-network
+    build:
+      context: .
+      dockerfile: src/Ordering/Ordering.Api/Dockerfile
+  payment.api:
+    image: ${DOCKER_REGISTRY-}catalogapi
+    depends_on:
+        - rabbitmq
+    networks:
+      - sample-network
+    build:
+      context: .
+      dockerfile: src/Payment/Payment.Api/Dockerfile
+  stock.api:
+    image: ${DOCKER_REGISTRY-}catalogapi
+    depends_on:
+        - rabbitmq
+        - sql 
+    networks:
+      - sample-network
+    build:
+      context: .
+      dockerfile: src/Stock/Stock.Api/Dockerfile
+  identity.api:
+    image: ${DOCKER_REGISTRY-}catalogapi
+    depends_on:
+        - rabbitmq
+        - sql 
+    networks:
+      - sample-network
+    build:
+      context: .
+      dockerfile: src/Identity/Identity.Api/Dockerfile
+  gateway.api:
+    image: ${DOCKER_REGISTRY-}catalogapi
+    depends_on:
+        - rabbitmq
+    networks:
+      - sample-network
+    build:
+      context: .
+      dockerfile: src/Gateway/Gateway.Api/Dockerfile
+networks:
+  sample-network:
+    name: sample-network
+    driver: bridge
