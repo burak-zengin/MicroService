@@ -1,0 +1,13 @@
+Create Database Stock
+
+Go
+
+Use Stock
+
+Go
+
+Create Table Stocks
+(
+	Barcode		NVarChar(50) Not Null Primary Key,
+	Quantity	Int Not Null
+)
